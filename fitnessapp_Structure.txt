@@ -1,0 +1,90 @@
+/fitnessapp/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Layout/
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   ├── Auth/
+│   │   │   │   ├── LoginForm.jsx
+│   │   │   │   ├── SignupForm.jsx
+│   │   │   │   └── EmailVerification.jsx
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── AdminDashboard.jsx
+│   │   │   │   ├── MemberDashboard.jsx
+│   │   │   │   └── TrainerDashboard.jsx
+│   │   │   ├── Workouts/
+│   │   │   │   ├── ExerciseLibrary.jsx
+│   │   │   │   └── WorkoutTracker.jsx
+│   │   │   ├── Nutrition/
+│   │   │   │   ├── MealPlanner.jsx
+│   │   │   │   └── NutritionStats.jsx
+│   │   │   ├── Appointments/
+│   │   │   │   └── AppointmentCalendar.jsx
+│   │   │   ├── Profile/
+│   │   │   │   ├── UserProfile.jsx
+│   │   │   │   └── Settings.jsx
+│   │   │   └── Charts/
+│   │   │       └── ProgressChart.jsx
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── SignupPage.jsx
+│   │   │   ├── MemberDashboardPage.jsx
+│   │   │   ├── TrainerDashboardPage.jsx
+│   │   │   ├── ExerciseLibraryPage.jsx
+│   │   │   ├── WorkoutTrackerPage.jsx
+│   │   │   ├── MealPlannerPage.jsx
+│   │   │   ├── AppointmentPage.jsx
+│   │   │   ├── ProfilePage.jsx
+│   │   │   └── AdminPage.jsx
+│   │   ├── store/
+│   │   │   ├── index.js
+│   │   │   └── slices/
+│   │   │       ├── authSlice.js
+│   │   │       ├── workoutSlice.js
+│   │   │       ├── nutritionSlice.js
+│   │   │       └── appointmentSlice.js
+│   │   ├── utils/
+│   │   │   └── api.js
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── tailwind.config.js
+│   └── package.json
+└── backend/
+    ├── src/
+    │   ├── config/
+    │   │   ├── db.js
+    │   │   └── auth.js
+    │   ├── models/
+    │   │   ├── User.js
+    │   │   ├── Workout.js
+    │   │   ├── Exercise.js
+    │   │   ├── Meal.js
+    │   │   ├── Appointment.js
+    │   │   ├── Progress.js
+    │   │   └── index.js
+    │   ├── routes/
+    │   │   ├── authRoutes.js
+    │   │   ├── userRoutes.js
+    │   │   ├── workoutRoutes.js
+    │   │   ├── nutritionRoutes.js
+    │   │   ├── appointmentRoutes.js
+    │   │   └── adminRoutes.js
+    │   ├── controllers/
+    │   │   ├── authController.js
+    │   │   ├── userController.js
+    │   │   ├── workoutController.js
+    │   │   ├── nutritionController.js
+    │   │   ├── appointmentController.js
+    │   │   └── adminController.js
+    │   ├── middleware/
+    │   │   ├── authMiddleware.js
+    │   │   └── errorHandler.js
+    │   ├── services/
+    │   │   ├── paymentService.js
+    │   │   └── notificationService.js
+    │   ├── app.js
+    │   └── server.js
+    └── package.json
+└── public/images
+	├── logo.png
