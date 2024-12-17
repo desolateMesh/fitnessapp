@@ -22,7 +22,8 @@ import {
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 
 // Mock data
 const mockVideos = [
@@ -30,6 +31,18 @@ const mockVideos = [
   { id: 2, title: 'Workout 2', url: '/placeholder.svg?height=200&width=200' },
   { id: 3, title: 'Workout 3', url: '/placeholder.svg?height=200&width=200' },
   { id: 4, title: 'Workout 4', url: '/placeholder.svg?height=200&width=200' },
+  { id: 5, title: 'Workout 1', url: '/placeholder.svg?height=200&width=200' },
+  { id: 6, title: 'Workout 2', url: '/placeholder.svg?height=200&width=200' },
+  { id: 7, title: 'Workout 3', url: '/placeholder.svg?height=200&width=200' },
+  { id: 8, title: 'Workout 4', url: '/placeholder.svg?height=200&width=200' },
+  { id: 9, title: 'Workout 1', url: '/placeholder.svg?height=200&width=200' },
+  { id: 10, title: 'Workout 2', url: '/placeholder.svg?height=200&width=200' },
+  { id: 11, title: 'Workout 3', url: '/placeholder.svg?height=200&width=200' },
+  { id: 12, title: 'Workout 4', url: '/placeholder.svg?height=200&width=200' },
+  { id: 13, title: 'Workout 1', url: '/placeholder.svg?height=200&width=200' },
+  { id: 14, title: 'Workout 2', url: '/placeholder.svg?height=200&width=200' },
+  { id: 15, title: 'Workout 3', url: '/placeholder.svg?height=200&width=200' },
+  { id: 16, title: 'Workout 4', url: '/placeholder.svg?height=200&width=200' },
 ];
 
 const mockClients = [
@@ -144,8 +157,13 @@ const WorkoutPlans = () => {
               Calendar
             </Typography>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DateCalendar value={selectedDate} onChange={handleDateClick} />
+              <DatePicker
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+                renderInput={(params) => <TextField {...params} />}
+              />
             </LocalizationProvider>
+
           </Box>
         </Box>
       </Box>

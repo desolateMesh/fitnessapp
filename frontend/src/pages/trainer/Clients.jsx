@@ -71,14 +71,14 @@ const Clients = () => {
       setFormError('');
       console.log('Creating client for trainer:', trainer.id);
       
-      // Create the user first
+      // create the user first
       const userResponse = await api.post('/users', {
         ...newClient,
         role: 'client'
       });
       console.log('Created user:', userResponse.data);
 
-      // Create the trainer-client relationship
+      // trainer-client relationship
       const relationshipResponse = await api.post('/trainer/clients', {
         trainer_id: trainer.id,
         client_id: userResponse.data.id
@@ -101,8 +101,6 @@ const Clients = () => {
       setFormError(err.response?.data?.error || 'Failed to create client account');
     }
   };
-
-  // Rest of your component code remains the same...
 
   return (
     <Container maxWidth="xl">

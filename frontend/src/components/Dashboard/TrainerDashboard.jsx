@@ -38,8 +38,8 @@ const TrainerDashboard = () => {
   };
 
   const todaySchedule = [
-    { time: '9:00 AM', client: 'John Smith', type: 'Strength Training' },
-    { time: '11:00 AM', client: 'Sarah Johnson', type: 'HIIT Session' },
+    { time: '9:00 AM', client: 'Adam Williams', type: 'Strength Training' },
+    { time: '11:00 AM', client: 'Jason Rochau', type: 'HIIT Session' },
     { time: '2:00 PM', client: 'Mike Brown', type: 'Flexibility & Mobility' },
   ];
 

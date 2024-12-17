@@ -12,6 +12,12 @@ import {
   LinearProgress,
   Divider,
   Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import {
   Activity,
@@ -34,8 +40,8 @@ const MemberDashboard = () => {
   const [error, setError] = useState(null);
 
   // Get user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
-  const username = userData.username || 'Member';
+  const userData = JSON.parse(localStorage.getItem('user'));
+  const username = userData?.username || 'Member';
   
   useEffect(() => {
     fetchTrainerInfo();
@@ -64,6 +70,40 @@ const MemberDashboard = () => {
     streakDays: 15,
     nutritionScore: 80,
   };
+
+  // Mock workout data
+  const mockWorkouts = [
+    { 
+      date: '2024-12-17', 
+      type: 'Strength', 
+      exercise: 'Bench Press', 
+      reps: 10, 
+      sets: 3, 
+      weight: 150, 
+      time: 45, 
+      notes: 'Increase weight next time' 
+    },
+    { 
+      date: '2024-12-18', 
+      type: 'Cardio', 
+      exercise: 'Running', 
+      reps: null, 
+      sets: null, 
+      weight: null, 
+      time: 30, 
+      notes: 'Maintain steady pace' 
+    },
+    { 
+      date: '2024-12-19', 
+      type: 'HIIT', 
+      exercise: 'Circuit Training', 
+      reps: 15, 
+      sets: 4, 
+      weight: null, 
+      time: 40, 
+      notes: 'Focus on form' 
+    }
+  ];
 
   const tabs = [
     { id: 'workouts', label: 'Workouts', icon: <Dumbbell size={20} /> },
@@ -129,7 +169,36 @@ const MemberDashboard = () => {
                 Upcoming Workouts
               </Typography>
               <Paper sx={{ p: 2 }}>
-                Coming soon...
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Type</TableCell>
+                        <TableCell>Exercise</TableCell>
+                        <TableCell>Reps</TableCell>
+                        <TableCell>Sets</TableCell>
+                        <TableCell>Weight (lbs)</TableCell>
+                        <TableCell>Duration (min)</TableCell>
+                        <TableCell>Notes</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {mockWorkouts.map((workout, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{workout.date}</TableCell>
+                          <TableCell>{workout.type}</TableCell>
+                          <TableCell>{workout.exercise}</TableCell>
+                          <TableCell>{workout.reps}</TableCell>
+                          <TableCell>{workout.sets}</TableCell>
+                          <TableCell>{workout.weight}</TableCell>
+                          <TableCell>{workout.time}</TableCell>
+                          <TableCell>{workout.notes}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Paper>
             </Grid>
           </Grid>

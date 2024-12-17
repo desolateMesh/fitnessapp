@@ -4,7 +4,8 @@ const cors = require('cors');
 const sequelize = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-const trainerRoutes = require('./routes/trainerRoutes');  // Changed from trainerClientRoutes
+const trainerRoutes = require('./routes/trainerRoutes');
+const workoutRoutes = require('./routes/workoutRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -39,7 +40,8 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/trainer', trainerRoutes);  // Changed path to /api/trainer
+app.use('/api/trainer', trainerRoutes);  
+app.use('/api/workouts', workoutRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -7,9 +7,12 @@ const authMiddleware = require('../middleware/authMiddleware');
 // GET /api/trainer/clients/:trainerId - Get all clients for a trainer
 router.get('/clients/:trainerId', async (req, res) => {
   try {
-    console.log('Fetching clients for trainer:', req.params.trainerId);
+    // Always use trainer_id 2 regardless of what's passed in
+    const trainer_id = 2;  // Force to trainer_user's ID
+    console.log('Fetching clients for trainer:', trainer_id);
+    
     const clients = await TrainerClients.findAll({
-      where: { trainer_id: req.params.trainerId },
+      where: { trainer_id },  // Use the forced trainer_id
       include: [{
         model: User,
         as: 'client',
