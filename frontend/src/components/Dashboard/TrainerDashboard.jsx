@@ -1,6 +1,7 @@
 // src/pages/TrainerDashboard.jsx
 import React, { useState } from 'react';
 import Clients from '../../pages/trainer/Clients';
+import WorkoutPlans from '../../pages/trainer/WorkoutPlans';
 import {
   Box,
   Container,
@@ -137,7 +138,9 @@ const TrainerDashboard = () => {
           </Grid>
         );
       case 'clients':
-        return <Clients />; // Added this case
+        return <Clients />;
+      case 'workoutPlans':
+        return <WorkoutPlans />;
       default:
         return (
           <Box sx={{ textAlign: 'center', color: 'text.secondary', py: 4 }}>

@@ -24,13 +24,8 @@ import {
 } from '@mui/material';
 import {
   UserPlus,
-  Mail,
-  Phone,
   MessageSquare,
-  Video,
-  Search,
   UserMinus,
-  Settings,
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -39,6 +34,7 @@ const Clients = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
+  const [formError, setFormError] = useState('');
   const [newClient, setNewClient] = useState({
     username: '',
     email: '',
@@ -46,10 +42,10 @@ const Clients = () => {
     first_name: '',
     last_name: '',
     phone: '',
-    role: 'client',
+    role: 'client'
   });
 
-  const trainer = JSON.parse(localStorage.getItem('user')) || {};
+  const trainer = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     fetchClients();
@@ -57,10 +53,13 @@ const Clients = () => {
 
   const fetchClients = async () => {
     try {
-      setLoading(true);
-      const response = await api.get(`/trainer-clients/${trainer.id}`);
+      console.log('Fetching clients for trainer ID:', trainer.id);
+      const response = await api.get(`/trainer/clients/${trainer.id}`);
+      console.log('Fetched clients:', response.data);
       setClients(response.data);
+      setError('');
     } catch (err) {
+      console.error('Error fetching clients:', err);
       setError('Failed to fetch clients');
     } finally {
       setLoading(false);
@@ -69,12 +68,22 @@ const Clients = () => {
 
   const handleAddClient = async () => {
     try {
-      const response = await api.post('/users', newClient);
-
-      await api.post('/trainer-clients', {
-        trainerId: trainer.id,
-        clientId: response.data.id,
+      setFormError('');
+      console.log('Creating client for trainer:', trainer.id);
+      
+      // Create the user first
+      const userResponse = await api.post('/users', {
+        ...newClient,
+        role: 'client'
       });
+      console.log('Created user:', userResponse.data);
+
+      // Create the trainer-client relationship
+      const relationshipResponse = await api.post('/trainer/clients', {
+        trainer_id: trainer.id,
+        client_id: userResponse.data.id
+      });
+      console.log('Created trainer-client relationship:', relationshipResponse.data);
 
       await fetchClients();
       setOpenDialog(false);
@@ -85,12 +94,15 @@ const Clients = () => {
         first_name: '',
         last_name: '',
         phone: '',
-        role: 'client',
+        role: 'client'
       });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create client account');
+      console.error('Error creating client:', err);
+      setFormError(err.response?.data?.error || 'Failed to create client account');
     }
   };
+
+  // Rest of your component code remains the same...
 
   return (
     <Container maxWidth="xl">
@@ -110,7 +122,7 @@ const Clients = () => {
           </Grid>
         </Grid>
 
-        {error && <Alert severity="error">{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
         <TableContainer component={Paper}>
           <Table>
@@ -123,33 +135,43 @@ const Clients = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {clients.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell>{client.first_name} {client.last_name}</TableCell>
-                  <TableCell>{client.email}</TableCell>
-                  <TableCell>{client.phone}</TableCell>
-                  <TableCell>
-                    <Tooltip title="Message">
-                      <IconButton>
-                        <MessageSquare />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Remove Client">
-                      <IconButton color="error">
-                        <UserMinus />
-                      </IconButton>
-                    </Tooltip>
+              {clients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    No clients found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                clients.map((clientRelation) => (
+                  <TableRow key={clientRelation.id}>
+                    <TableCell>
+                      {clientRelation.client?.first_name} {clientRelation.client?.last_name}
+                    </TableCell>
+                    <TableCell>{clientRelation.client?.email}</TableCell>
+                    <TableCell>{clientRelation.client?.phone}</TableCell>
+                    <TableCell>
+                      <Tooltip title="Message">
+                        <IconButton>
+                          <MessageSquare />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Remove Client">
+                        <IconButton color="error">
+                          <UserMinus />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* Dialog for Adding New Client */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
           <DialogTitle>Add New Client</DialogTitle>
           <DialogContent>
+            {formError && <Alert severity="error" sx={{ mb: 2 }}>{formError}</Alert>}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
@@ -205,7 +227,11 @@ const Clients = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" onClick={handleAddClient} disabled={!newClient.email || !newClient.password}>
+            <Button 
+              variant="contained" 
+              onClick={handleAddClient}
+              disabled={!newClient.email || !newClient.password}
+            >
               Create Client Account
             </Button>
           </DialogActions>

@@ -73,4 +73,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+// GET /api/users/trainer/:clientId - Get trainer info for a client
+router.get('/trainer/:clientId', async (req, res) => {
+  try {
+    const trainerClient = await TrainerClients.findOne({
+      where: { client_id: req.params.clientId },
+      include: [{
+        model: User,
+        as: 'trainer',
+        attributes: ['id', 'username', 'email', 'first_name', 'last_name']
+      }]
+    });
+
+    if (!trainerClient) {
+      return res.status(404).json({ error: 'No trainer assigned' });
+    }
+
+    res.json(trainerClient);
+  } catch (err) {
+    console.error('Error fetching trainer info:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;

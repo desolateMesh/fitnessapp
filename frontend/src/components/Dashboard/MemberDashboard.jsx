@@ -1,5 +1,5 @@
 // src/pages/MemberDashboard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -11,6 +11,7 @@ import {
   CardContent,
   LinearProgress,
   Divider,
+  Avatar,
 } from '@mui/material';
 import {
   Activity,
@@ -25,13 +26,32 @@ import {
   MessageSquare,
   Video,
 } from 'lucide-react';
+import api from '../../utils/api';
 
 const MemberDashboard = () => {
   const [activeTab, setActiveTab] = useState('workouts');
+  const [trainerInfo, setTrainerInfo] = useState(null);
+  const [error, setError] = useState(null);
 
   // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user')) || {};
-  const username = userData.username || 'Member'; // fallback to 'Member' if no username
+  const username = userData.username || 'Member';
+  
+  useEffect(() => {
+    fetchTrainerInfo();
+  }, []);
+
+  const fetchTrainerInfo = async () => {
+    try {
+      const response = await api.get(`/trainer-clients/trainer/${userData.id}`);
+      if (response.data?.trainer) {
+        setTrainerInfo(response.data.trainer);
+      }
+    } catch (err) {
+      console.error('Error fetching trainer info:', err);
+      setError('Failed to load trainer information');
+    }
+  };
   
   // Mock data for member stats
   const memberStats = {
@@ -39,7 +59,7 @@ const MemberDashboard = () => {
     nextSession: "Tomorrow at 10:00 AM",
     caloriesBurned: 12500,
     workoutGoal: 30,
-    weightProgress: 85, // percentage
+    weightProgress: 85,
     attendanceRate: 90,
     streakDays: 15,
     nutritionScore: 80,
@@ -131,14 +151,43 @@ const MemberDashboard = () => {
     }}>
       <Container maxWidth="xl">
         <Grid container spacing={3}>
-          {/* Welcome Section */}
+          {/* Welcome Section with Trainer Info */}
           <Grid item xs={12}>
-            <Typography variant="h4" gutterBottom>
-              Welcome back, {username}!
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              Here's your fitness journey overview
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+              <Box>
+                <Typography variant="h4" gutterBottom>
+                  Welcome back, {username}!
+                </Typography>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Here's your fitness journey overview
+                </Typography>
+              </Box>
+              {trainerInfo && (
+                <Card sx={{ minWidth: 300 }}>
+                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 50, height: 50 }}>
+                      {trainerInfo.username?.[0]?.toUpperCase()}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Your Trainer
+                      </Typography>
+                      <Typography variant="h6">
+                        {trainerInfo.username}
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<MessageSquare size={16} />}
+                        sx={{ mt: 1 }}
+                      >
+                        Message Trainer
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+            </Box>
           </Grid>
 
           {/* Stats Cards */}
