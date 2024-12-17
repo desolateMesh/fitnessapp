@@ -39,10 +39,16 @@ const Clients = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [newClient, setNewClient] = useState({
+    username: '',
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    role: 'client',
+  });
 
-  // Get trainer info from localStorage
   const trainer = JSON.parse(localStorage.getItem('user')) || {};
 
   useEffect(() => {
@@ -53,67 +59,45 @@ const Clients = () => {
     try {
       setLoading(true);
       const response = await api.get(`/trainer-clients/${trainer.id}`);
-      // Map the response to include client details from the joined data
-      const clientsWithDetails = response.data.map(tc => ({
-        id: tc.client.id,
-        first_name: tc.client.first_name,
-        last_name: tc.client.last_name,
-        email: tc.client.email,
-        phone: tc.client.phone,
-        status: tc.status,
-        assigned_at: tc.assigned_at
-      }));
-      setClients(clientsWithDetails);
+      setClients(response.data);
     } catch (err) {
       setError('Failed to fetch clients');
-      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Update handleAddClient function
-  const handleAddClient = async (clientData) => {
+  const handleAddClient = async () => {
     try {
-      const response = await api.post('/trainer-clients', {
+      const response = await api.post('/users', newClient);
+
+      await api.post('/trainer-clients', {
         trainerId: trainer.id,
-        email: clientData.email
+        clientId: response.data.id,
       });
-      await fetchClients(); // Refresh the list after adding
+
+      await fetchClients();
       setOpenDialog(false);
+      setNewClient({
+        username: '',
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+        phone: '',
+        role: 'client',
+      });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to add client');
-      console.error('Error:', err);
+      setError(err.response?.data?.error || 'Failed to create client account');
     }
   };
-
-  const handleRemoveClient = async (clientId) => {
-    if (window.confirm('Are you sure you want to remove this client?')) {
-      try {
-        await api.delete(`/trainer-clients/${trainer.id}/${clientId}`);
-        setClients(clients.filter(client => client.id !== clientId));
-      } catch (err) {
-        setError('Failed to remove client');
-        console.error('Error:', err);
-      }
-    }
-  };
-
-  const filteredClients = clients.filter(client =>
-    client.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <Container maxWidth="xl">
       <Box sx={{ py: 4 }}>
-        {/* Header */}
         <Grid container spacing={3} alignItems="center" sx={{ mb: 3 }}>
           <Grid item xs>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Client Management
-            </Typography>
+            <Typography variant="h4">Client Management</Typography>
           </Grid>
           <Grid item>
             <Button
@@ -126,104 +110,35 @@ const Clients = () => {
           </Grid>
         </Grid>
 
-        {/* Search Bar */}
-        <Paper sx={{ p: 2, mb: 3 }}>
-          <TextField
-            fullWidth
-            placeholder="Search clients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: <Search size={20} style={{ marginRight: 8 }} />,
-            }}
-          />
-        </Paper>
+        {error && <Alert severity="error">{error}</Alert>}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {/* Clients Table */}
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Client Name</TableCell>
-                <TableCell>Contact Info</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Joined</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredClients.map((client) => (
+              {clients.map((client) => (
                 <TableRow key={client.id}>
+                  <TableCell>{client.first_name} {client.last_name}</TableCell>
+                  <TableCell>{client.email}</TableCell>
+                  <TableCell>{client.phone}</TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box>
-                        <Typography variant="subtitle2">
-                          {client.first_name} {client.last_name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {client.username}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body2">{client.email}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {client.phone}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box
-                      sx={{
-                        backgroundColor: client.status === 'active' ? 'success.lighter' : 'warning.lighter',
-                        color: client.status === 'active' ? 'success.main' : 'warning.main',
-                        py: 0.5,
-                        px: 1,
-                        borderRadius: 1,
-                        display: 'inline-block',
-                      }}
-                    >
-                      {client.status}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(client.assigned_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                      <Tooltip title="Message">
-                        <IconButton size="small">
-                          <MessageSquare size={20} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Video Call">
-                        <IconButton size="small">
-                          <Video size={20} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Settings">
-                        <IconButton size="small">
-                          <Settings size={20} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Remove Client">
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => handleRemoveClient(client.id)}
-                        >
-                          <UserMinus size={20} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
+                    <Tooltip title="Message">
+                      <IconButton>
+                        <MessageSquare />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Remove Client">
+                      <IconButton color="error">
+                        <UserMinus />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
@@ -231,22 +146,67 @@ const Clients = () => {
           </Table>
         </TableContainer>
 
-        {/* Add Client Dialog */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        {/* Dialog for Adding New Client */}
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
           <DialogTitle>Add New Client</DialogTitle>
           <DialogContent>
-            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Email"
-                helperText="Enter client's email to send invitation"
-              />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="First Name"
+                    value={newClient.first_name}
+                    onChange={(e) => setNewClient({ ...newClient, first_name: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name"
+                    value={newClient.last_name}
+                    onChange={(e) => setNewClient({ ...newClient, last_name: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    type="email"
+                    value={newClient.email}
+                    onChange={(e) =>
+                      setNewClient({
+                        ...newClient,
+                        email: e.target.value,
+                        username: e.target.value.split('@')[0],
+                      })
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Phone"
+                    value={newClient.phone}
+                    onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    type="password"
+                    value={newClient.password}
+                    onChange={(e) => setNewClient({ ...newClient, password: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
             </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" onClick={handleAddClient}>
-              Send Invitation
+            <Button variant="contained" onClick={handleAddClient} disabled={!newClient.email || !newClient.password}>
+              Create Client Account
             </Button>
           </DialogActions>
         </Dialog>

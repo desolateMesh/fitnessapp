@@ -3,18 +3,14 @@ const User = require('./User');
 const TrainerClients = require('./TrainerClients');
 
 // Set up associations
-User.belongsToMany(User, {
-  through: TrainerClients,
-  as: 'clients',
-  foreignKey: 'trainer_id',
-  otherKey: 'client_id'
+User.hasMany(TrainerClients, {
+  as: 'trainedClients',
+  foreignKey: 'trainer_id'
 });
 
-User.belongsToMany(User, {
-  through: TrainerClients,
-  as: 'trainers',
-  foreignKey: 'client_id',
-  otherKey: 'trainer_id'
+User.hasMany(TrainerClients, {
+  as: 'trainerAssignments',
+  foreignKey: 'client_id'
 });
 
 TrainerClients.belongsTo(User, {

@@ -1,84 +1,75 @@
 // src/routes/trainerRoutes.js
 const express = require('express');
 const router = express.Router();
-const { User, TrainerClients } = require('../models');
-const { Op } = require('sequelize');
+const { TrainerClients, User } = require('../models');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Get all clients for a specific trainer
-router.get('/trainer-clients/:trainerId', async (req, res) => {
+// Middleware to ensure user is a trainer
+const isTrainer = (req, res, next) => {
+  if (req.user.role !== 'trainer') {
+    return res.status(403).json({ error: 'Access denied. Trainer role required.' });
+  }
+  next();
+};
+
+// Get all clients for a trainer
+router.get('/clients', authMiddleware, isTrainer, async (req, res) => {
   try {
-    const trainerClients = await TrainerClients.findAll({
-      where: { trainer_id: req.params.trainerId },
+    const clients = await TrainerClients.findAll({
+      where: { trainer_id: req.user.id },
       include: [{
         model: User,
         as: 'client',
-        attributes: ['id', 'username', 'email', 'first_name', 'last_name', 'phone'],
-      }],
+        attributes: ['id', 'username', 'email']
+      }]
     });
-    res.json(trainerClients);
+    res.json(clients);
   } catch (err) {
     console.error('Error fetching trainer clients:', err);
-    res.status(500).json({ error: 'Failed to fetch clients' });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Add a new client to trainer
-router.post('/trainer-clients', async (req, res) => {
+// Assign a client to a trainer
+router.post('/clients', authMiddleware, isTrainer, async (req, res) => {
   try {
-    const { trainerId, email } = req.body;
-    
-    // First find or validate the client user
-    const clientUser = await User.findOne({
-      where: { 
-        email,
+    const { client_id } = req.body;
+    console.log('Request body:', req.body); // Debug log
+
+    // Verify client exists and is a client
+    const client = await User.findOne({
+      where: {
+        id: client_id,
         role: 'client'
       }
     });
 
-    if (!clientUser) {
-      return res.status(404).json({ error: 'Client not found' });
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found or invalid role' });
     }
 
     // Check if relationship already exists
-    const existingRelation = await TrainerClients.findOne({
+    const existingRelationship = await TrainerClients.findOne({
       where: {
-        trainer_id: trainerId,
-        client_id: clientUser.id
+        trainer_id: req.user.id,
+        client_id
       }
     });
 
-    if (existingRelation) {
-      return res.status(400).json({ error: 'Client already assigned to trainer' });
+    if (existingRelationship) {
+      return res.status(400).json({ error: 'Client is already assigned to this trainer' });
     }
 
-    // Create new trainer-client relationship
-    const newTrainerClient = await TrainerClients.create({
-      trainer_id: trainerId,
-      client_id: clientUser.id,
-      status: 'active'
+    // Create trainer-client relationship
+    const trainerClient = await TrainerClients.create({
+      trainer_id: req.user.id,
+      client_id
     });
 
-    res.json(newTrainerClient);
+    res.status(201).json(trainerClient);
   } catch (err) {
-    console.error('Error adding trainer client:', err);
-    res.status(500).json({ error: 'Failed to add client' });
-  }
-});
-
-// Remove client from trainer
-router.delete('/trainer-clients/:trainerId/:clientId', async (req, res) => {
-  try {
-    const { trainerId, clientId } = req.params;
-    await TrainerClients.destroy({
-      where: {
-        trainer_id: trainerId,
-        client_id: clientId
-      }
-    });
-    res.json({ message: 'Client removed successfully' });
-  } catch (err) {
-    console.error('Error removing trainer client:', err);
-    res.status(500).json({ error: 'Failed to remove client' });
+    console.error('Error assigning client:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

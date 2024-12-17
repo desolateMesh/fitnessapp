@@ -10,11 +10,19 @@ const TrainerClients = sequelize.define('TrainerClients', {
   },
   trainer_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   },
   client_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   },
   assigned_at: {
     type: DataTypes.DATE,
@@ -25,17 +33,13 @@ const TrainerClients = sequelize.define('TrainerClients', {
     defaultValue: 'active'
   },
   notes: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'trainer_clients',
   timestamps: false,
-  indexes: [
-    {
-      unique: true,
-      fields: ['trainer_id', 'client_id']
-    }
-  ]
+  underscored: true
 });
 
 module.exports = TrainerClients;
